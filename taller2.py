@@ -5,7 +5,7 @@ from scapy.all import *
 from time import *
 
 responses = {}
-for i in range(2):
+for i in range(10):
     print()
     for ttl in range(1,25):
         probe = IP(dst=sys.argv[1], ttl=ttl) / ICMP()
@@ -16,6 +16,6 @@ for i in range(2):
         if ans is not None:
             if ttl not in responses:
                 responses[ttl] = []
-                responses[ttl].append((ans.src, rtt))
+            responses[ttl].append((ans.src, rtt))
             if ttl in responses:
                 print(ttl, responses[ttl])
