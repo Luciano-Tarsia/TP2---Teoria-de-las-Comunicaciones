@@ -41,7 +41,6 @@ print("Done with packets!")
 #    print(ttl, responses[ttl]
 
 results = []
-previous_rtt = 0
 for ttl in responses:
     print(f"Getting most frequent ip and mean rtt for jump number {ttl}.")
     responses_in_step = responses[ttl]
@@ -50,15 +49,26 @@ for ttl in responses:
     most_frequent_ip = most_frequent(ips)
     
     # mean of rtts corresponding to most frequent ip
-    rtts = [response[1] - previous_rtt for response in responses_in_step if response[0] == most_frequent_ip]
+    rtts = [response[1] for response in responses_in_step if response[0] == most_frequent_ip]
     mean_rtt = sum(rtts)/len(rtts)
     
     print(f"{[ttl, most_frequent_ip, mean_rtt]}")
     results.append([ttl, most_frequent_ip, mean_rtt])
-    previous_rtt = mean_rtt
+
+print("Calculating jumps between rtts.")
+
+for i in range(1, len(results)):
+    jump = results[i][2] - results[i-1][2]
+    if jump < 0:
+        j = 1
+        while i - j > 0 and jump < 0:
+            j += 1
+            jump = results[i][2] - results[i-j][2]
+    results[i][2] = max(jump, 0)
+
 print("Done! Saving data in data/ folder.")
 
 # so we don't overwrite
-filename = SAVE_PATH + "dest_ip " + strftime("%m-%d-%Y %H:%M:%S", localtime()) + ".csv"
+filename = SAVE_PATH + f"{dest_ip} " + strftime("%m-%d-%Y %H:%M:%S", localtime()) + ".csv"
 
 DataFrame(results, columns = ["ttl", "ip", "rtt"]).to_csv(filename, index=False)
