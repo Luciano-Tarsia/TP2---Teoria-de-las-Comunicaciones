@@ -1,36 +1,64 @@
 #!/usr/bin/env python3
 
+from statistics import mean
 import sys
 from scapy.all import *
 from time import *
+from pandas import DataFrame
+
+SAVE_PATH = "./data/"
 
 def most_frequent(List):
     return max(set(List), key = List.count)
 
+dest_ip = sys.argv[1]
+
 responses = {}
-for i in range(10):
-    for ttl in range(1,25):
-        probe = IP(dst=sys.argv[1], ttl=ttl) / ICMP()
+max_ttl = 30
+max_tries = 30
+
+print(f"Starting to traceroute IP {dest_ip}.")
+print(f"Attempting to trace a route with a maximum of {max_ttl} steps.")
+
+for ttl in range(1,max_ttl + 1):
+    print(f"Starting with TTL number {ttl}.")
+    for i in range(max_tries):
+        print(f"TTL number {ttl}, packet number {i}.")
+        probe = IP(dst=dest_ip, ttl=ttl) / ICMP()
+        print("sending...")
         t_i = time()
         ans = sr1(probe, verbose=False, timeout=0.8)
         t_f = time()
+        print("arrived")
         rtt = (t_f - t_i)*1000
         if ans is not None:
             if ttl not in responses:
                 responses[ttl] = []
             responses[ttl].append((ans.src, rtt))
-
+            print(responses[ttl])
+print("Done with packets!")
 #for ttl in responses:
-#    print(ttl, responses[ttl])
+#    print(ttl, responses[ttl]
 
+results = []
+previous_rtt = 0
 for ttl in responses:
-    rtts = []
-    ips = []
-    for jump in responses[ttl]:
-        ips.append(jump[0])
-        rtts.append(jump[1])
-
-    mean_rtt = sum(rtts)/len(rtts)
+    print(f"Getting most frequent ip and mean rtt for jump number {ttl}.")
+    responses_in_step = responses[ttl]
+    
+    ips = [response[0] for response in responses_in_step]
     most_frequent_ip = most_frequent(ips)
+    
+    # mean of rtts corresponding to most frequent ip
+    rtts = [response[1] - previous_rtt for response in responses_in_step if response[0] == most_frequent_ip]
+    mean_rtt = sum(rtts)/len(rtts)
+    
+    print(f"{[ttl, most_frequent_ip, mean_rtt]}")
+    results.append([ttl, most_frequent_ip, mean_rtt])
+    previous_rtt = mean_rtt
+print("Done! Saving data in data/ folder.")
 
-    print(ttl, most_frequent_ip, mean_rtt)
+# so we don't overwrite
+filename = SAVE_PATH + "dest_ip " + strftime("%m-%d-%Y %H:%M:%S", localtime()) + ".csv"
+
+DataFrame(results, columns = ["ttl", "ip", "rtt"]).to_csv(filename, index=False)

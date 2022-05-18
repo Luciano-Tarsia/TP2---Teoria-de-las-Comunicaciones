@@ -1,0 +1,5 @@
+Princeton University: 128.112.0.0
+University of Wollongong: 130.130.39.1
+China Education and Research Network Center: 101.4.0.1
+University of Oslo: 129.240.118.130
+University of Tel Aviv: 132.66.11.168
