@@ -17,9 +17,8 @@ def find_outliers(df):
         df["rtt_deviations"] = abs(rtts - rtts.mean())
         std = rtts.std()
         thompson = get_thompson_for_n(len(df))
-
-        if max(df["rtt_deviations"] > thompson * std):
-            outlier = df[df["rtt_deviations"].idxmax()]
+        if max(df["rtt_deviations"]) > thompson * std:
+            outlier = df.loc[df["rtt_deviations"].idxmax()]
 
             print("Outlier found.")
             print(outlier)
