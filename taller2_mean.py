@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-from statistics import mean
 import sys
 from scapy.all import *
 from time import *
 from pandas import DataFrame
-import taller2_punto_opcional as po
 
 SAVE_PATH = "./data/"
 
@@ -21,9 +19,9 @@ max_tries = 30
 print(f"Starting to traceroute IP {dest_ip}.")
 print(f"Attempting to trace a route with a maximum of {max_ttl} steps.")
 
-for ttl in range(1,max_ttl + 1):
+for ttl in range(1, max_ttl + 1):
     print(f"Starting with TTL number {ttl}.")
-    for i in range(max_tries):
+    for i in range(1, max_tries + 1):
         print(f"TTL number {ttl}, packet number {i}.")
         probe = IP(dst=dest_ip, ttl=ttl) / ICMP()
         print("sending...")
@@ -38,8 +36,7 @@ for ttl in range(1,max_ttl + 1):
             responses[ttl].append((ans.src, rtt))
             print(responses[ttl])
 print("Done with packets!")
-#for ttl in responses:
-#    print(ttl, responses[ttl]
+
 
 results = []
 for ttl in responses:
