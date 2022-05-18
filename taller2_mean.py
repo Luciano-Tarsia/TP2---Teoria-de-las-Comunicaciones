@@ -5,6 +5,7 @@ import sys
 from scapy.all import *
 from time import *
 from pandas import DataFrame
+import taller2_punto_opcional as po
 
 SAVE_PATH = "./data/"
 
@@ -71,4 +72,6 @@ print("Done! Saving data in data/ folder.")
 # so we don't overwrite
 filename = SAVE_PATH + f"{dest_ip} " + strftime("%m-%d-%Y %H:%M:%S", localtime()) + ".csv"
 
-DataFrame(results, columns = ["ttl", "ip", "rtt"]).to_csv(filename, index=False)
+df = DataFrame(results, columns = ["ttl", "ip", "rtt"])
+df.to_csv(filename, index=False)
+
